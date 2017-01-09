@@ -142,6 +142,7 @@ function [ varargout ] = plotECG( varargin )
 %   Changes
 %     Ver. 1.1.1
 %        The Matlab Data Cursor works now too, if you switch it on. Of course you can still use the built-in InformationList. 
+%        (However the scroll wheel does not work as long as Data Cursor Mode is on.) 
 %        Replaced the "<HTML>" tags with "<html>" because MATLAB Online uicontrol listbox doesn't support uppercase HTML tags. 
 %        Replaced the dash with a hyphen in the file's documentation because MATLAB editor on Mac doesn't support unicode. 
 %        
