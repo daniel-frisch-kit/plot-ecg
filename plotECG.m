@@ -1,7 +1,7 @@
 function [ varargout ] = plotECG( varargin )
 % -------------------------------------------------------
 %
-%    plotECG( X,Y, varargin ) ? Plot Very Long, Multichannel Signals ? Zoom & Scroll via Slider
+%    plotECG( X,Y, varargin ) - Plot Very Long, Multichannel Signals - Zoom & Scroll via Slider
 %
 %    Enables you to plot and zoom & scroll through signals with millions of samples. 
 %    There is one slider for scrolling and one for zooming. 
@@ -14,10 +14,10 @@ function [ varargout ] = plotECG( varargin )
 %    If you launch plotECG() without any arguments, 
 %    one of two demos is shown. 
 %
-%    Ver. 1.1.0
+%    Ver. 1.1.1
 %
 %    Created:         Daniel Frisch        (15.02.2015)
-%    Last modified:   Daniel Frisch        (25.09.2016)
+%    Last modified:   Daniel Frisch        (09.01.2017)
 %
 %
 % -------------------------------------------------------
@@ -139,12 +139,25 @@ function [ varargout ] = plotECG( varargin )
 %
 %
 %
+%   Changes
+%     Ver. 1.1.1
+%        The Matlab Data Cursor works now too, if you switch it on. Of course you can still use the built-in InformationList. 
+%        (However the scroll wheel does not work as long as Data Cursor Mode is on.) 
+%        Replaced the "<HTML>" tags with "<html>" because MATLAB Online uicontrol listbox doesn't support uppercase HTML tags. 
+%        Replaced the dash with a hyphen in the file's documentation because MATLAB editor on Mac doesn't support unicode. 
+%        
+%
+%
+%
 %   TODO
 %     Export tight images (PDF, PNG) via menu bar
 %     Multiple filters for signal
 %     Add scaling information bars into figure
 %     Currently no line if panned by hand instead of slider
 %     Enable signal data update during runtime (return function handle) 
+%     Test thoroughly with MATLAB Online and Linux 
+%
+%
 %
 
 
@@ -356,7 +369,6 @@ end
 
 hs.ax = axes(...
     'Parent',hs.panel,...
-    'ButtonDownFcn',@btnDown,...
     'TickLabelInterpreter','none',...
     'ActivePositionProperty','Position');
 if ~isempty(parser.Results.ColorOrder)
@@ -507,7 +519,6 @@ hs.ax.XAxis.ExponentMode = 'manual';
 hs.ax.YAxis.Exponent = 0;
 hs.ax.YAxis.ExponentMode = 'manual';
 
-set(hs.line,'PickableParts','none')
 if strcmpi(parser.Results.ShowAxisTicks,'on')
     hs.ax.XLabel.String = defaultXLabel;
     hs.ax.TickLength = [0.001,0.001];
@@ -689,10 +700,10 @@ hs.panel.Visible = 'on';
         
         % Use original or filtered signal according to checkbox state
         if isfield(SIG,'filter') && SIG.filter.mainCheck.Value == SIG.filter.mainCheck.Max
-            if isscalar(SIG.X), XData=1/SIG.X*(ind-1); else XData=SIG.X(ind); end
+            if isscalar(SIG.X), XData=1/SIG.X*(ind-1); else, XData=SIG.X(ind); end
             YData = SIG.Y(ind,:);
         else
-            if isscalar(SIG.X0), XData=period*(ind-1); else XData = SIG.X0(ind); end
+            if isscalar(SIG.X0), XData=period*(ind-1); else, XData = SIG.X0(ind); end
             YData = SIG.Y0(ind,:);
         end
         
@@ -774,7 +785,7 @@ hs.panel.Visible = 'on';
         end
         
         % Big scrollbar if there is nothing to scroll
-        if N<=numPoints, 
+        if N<=numPoints
             majorStep = Inf; 
             minorStep = .1;
         else % N > numPoints
@@ -963,6 +974,8 @@ hs.panel.Visible = 'on';
 
 if ~strcmpi(parser.Results.ShowInformationList,'none')
     hs.ax.ButtonDownFcn = @btnDown;
+    %set(hs.line,'PickableParts','none')  % DataCursor doesn't work anymore if you use this. 
+    set(hs.line,'ButtonDownFcn',@btnDown) % DataCursor mode puts its own callback here as long as it is enabled. 
 end
 
     function delete_plotECG(varargin)
@@ -1179,21 +1192,21 @@ deltaY = abs(click.y(1)-click.y(2));
 %fprintf('dx=%f; freq=%f, dy=%f\n',deltaX,freq,deltaY)
 
 str = {
-    '<HTML>( &#916x <tt>&#8629</tt> 1/&#916x )</HTML>'
+    '<html>( &#916x <tt>&#8629</tt> 1/&#916x )</html>'
     deltaX
     freq
     ''
     
-    '<HTML>( &#916y )</HTML>'
+    '<html>( &#916y )</html>'
     deltaY
     ''
     
-    '<HTML>( x<sub>1</sub> <tt>&#8629</tt> x<sub>2</sub> )</HTML>'
+    '<html>( x<sub>1</sub> <tt>&#8629</tt> x<sub>2</sub> )</html>'
     click.x(2)
     click.x(1)
     ''
     
-    '<HTML>( y<sub>1</sub> <tt>&#8629</tt> y<sub>2</sub> )</HTML>'
+    '<html>( y<sub>1</sub> <tt>&#8629</tt> y<sub>2</sub> )</html>'
     click.y(2)
     click.y(1)
     ''
@@ -1277,7 +1290,7 @@ function [ time_out, sig_out, description ] = filter_bandpass_notch( time_in, si
     description.slider(3).Label  = 'notch width';
     description.slider(3).Min    =  0.000001;
     description.slider(3).Value  =  .3;
-    description.slider(3).Max    =  100; 
+    description.slider(3).Max    =  99; 
 
     % Slider for notch frequency
     description.slider(4).Label  = 'notch';
